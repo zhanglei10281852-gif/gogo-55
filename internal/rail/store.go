@@ -268,6 +268,9 @@ func (s Store) Recover(snapshot string) (ReleaseState, error) {
 	if err := s.Save(state); err != nil {
 		return ReleaseState{}, err
 	}
+	if _, err := s.AppendAudit("recover", "system", state.Release, map[string]string{"snapshot": snapshot}, time.Now()); err != nil {
+		return ReleaseState{}, fmt.Errorf("record recovery in audit: %w", err)
+	}
 	return state, nil
 }
 
