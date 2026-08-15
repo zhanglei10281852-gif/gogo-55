@@ -1,0 +1,47 @@
+name: releaserail-demo
+version: 1.0.0
+metadata:
+  owner: local-platform
+  purpose: offline-demo
+environments:
+  - name: staging
+    rank: 1
+    variables:
+      release_ready: "yes"
+    gates:
+      - name: readiness
+        kind: condition
+        condition: release_ready=yes
+      - name: artifact-integrity
+        kind: artifact
+components:
+  - name: api
+    version: 1.0.0
+    artifact:
+      path: artifacts/api.txt
+      sha256: 17872195fc697822c39efc1d9efc548fa2675864ea6cfb86a3cf6144efc21acb
+      size: 30
+    rollout:
+      strategy: waves
+      waveSize: 2
+      seed: demo-seed
+      instances: 5
+      pause: 0s
+    health:
+      - name: optional-error-rate
+        metric: error_rate
+        operator: <=
+        threshold: 0.05
+        window: 5m
+        required: false
+    migrations:
+      - id: create-release-table
+        phase: pre
+        reversible: true
+        command: simulate-create-release-table
+        rollback: simulate-drop-release-table
+policies:
+  requireArtifact: true
+  requireRollback: true
+  maxParallel: 2
+  allowedGateKinds: [approval, condition, artifact, health]

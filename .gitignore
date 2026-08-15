@@ -1,0 +1,5 @@
+.releaserail/
+.smoke-state/
+.validation-cache/
+*.exe
+*.test
